@@ -2,22 +2,24 @@
 #include "solid.hpp"
 
 #include <iostream>
-#include <memory>
 
 template <unsigned int dim> void draw(RigidBody<dim> &);
+template <unsigned int dim>
+std::ostream &operator<<(std::ostream &out,
+                         const std::vector<Point<dim>> &perimeter);
 
 int main() {
-  std::vector<std::unique_ptr<Shape<2>>> shapes;
-  shapes.push_back(
-      std::make_unique<Segment<2>>(Point<2>({0, 0}), Point<2>({0, 129})));
-  shapes.push_back(
-      std::make_unique<Segment<2>>(Point<2>({0, 129}), Point<2>({129, 129})));
-  shapes.push_back(
-      std::make_unique<Segment<2>>(Point<2>({129, 129}), Point<2>({129, 0})));
+  std::vector<CollisionShapesT<2>> shapes{
+      Segment<2>(Point<2>(0, 0), Point<2>(0, 129)),
+      Segment<2>(Point<2>(0, 129), Point<2>(129, 129)),
+      Segment<2>(Point<2>(129, 129), Point<2>(129, 0))};
 
-  RigidBody<2> solid(Point<2>({0, 0}), std::move(shapes));
+  RigidBody<2> solid(Point<2>(0, 0), std::move(shapes));
 
   draw(solid);
+
+  std::cout << solid.getPerimeter() << std::endl;
+
   return 0;
 }
 
@@ -50,3 +52,14 @@ template <unsigned int dim> void draw(RigidBody<dim> &solid) {
   std::cout.width(4);
   std::cout << "y" << std::endl;
 };
+
+template <unsigned int dim>
+std::ostream &operator<<(std::ostream &out,
+                         const std::vector<Point<dim>> &perimeter) {
+  out << "[";
+  for (const auto &[xp, yp] : perimeter) {
+    out << "(" << xp << "," << yp << ") : ";
+  }
+  out << std::endl;
+  return out;
+}
