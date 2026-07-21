@@ -62,7 +62,7 @@ public:
       const int max_x = B.x > A.x ? B.x : A.x;
       const int min_x = B.x > A.x ? A.x : B.x;
 
-      for (int x = min_x; x < max_x; x++) {
+      for (int x = min_x; x <= max_x; x++) {
         const double k_y = x - A.x / dist_x;
         const int y = A.y + k_y * (B.y - A.y);
         cached_perimeter.push_back(Point<dim>(x, y));
@@ -71,7 +71,7 @@ public:
       const int max_y = B.y > A.y ? B.y : A.y;
       const int min_y = B.y > A.y ? A.y : B.y;
 
-      for (int y = min_y; y < max_y; y++) {
+      for (int y = min_y; y <= max_y; y++) {
         const double k_x = y - A.y / dist_y;
         const int x = A.x + k_x * (B.x - A.x);
         cached_perimeter.push_back(Point<dim>(x, y));
