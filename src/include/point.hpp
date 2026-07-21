@@ -7,15 +7,32 @@ template <> struct Point<2> {
   const int x;
   const int y;
 
-  Point(int x_, int y_) : x(x_), y(y_) {}
+  Point(const int x_, const int y_) : x(x_), y(y_) {}
   ~Point() = default;
+
+  inline friend bool operator==(const Point<2> &lhs, const Point<2> &rhs) {
+    return lhs.x == rhs.x && lhs.y == rhs.y;
+  }
+
+  inline friend Point<2> operator+(const Point<2> &lhs, const Point<2> &rhs) {
+    return Point<2>(lhs.x + rhs.x, lhs.y + rhs.y);
+  }
 };
 
 template <> struct Point<3> {
   const int x;
   const int y;
   const int z;
-  Point(int x_, int y_, int z_) : x(x_), y(y_), z(z_) {};
+  Point(const int x_, const int y_, const int z_) : x(x_), y(y_), z(z_) {};
+  ~Point() = default;
+
+  inline friend bool operator==(const Point<3> &lhs, const Point<3> &rhs) {
+    return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;
+  }
+
+  inline friend Point<3> operator+(const Point<3> &lhs, const Point<3> &rhs) {
+    return Point<3>(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
+  }
 };
 
 #endif // _POINT_HPP

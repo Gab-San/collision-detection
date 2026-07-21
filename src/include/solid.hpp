@@ -3,6 +3,7 @@
 
 #include "shape.hpp"
 
+#include <functional>
 #include <iostream>
 #include <utility>
 #include <variant>
@@ -48,9 +49,10 @@ public:
     return false;
   }
 
-  std::ostream &draw(std::ostream &out, int row, int width) const {
+  std::ostream &draw(std::ostream &out, const int row, const int width,
+                     const bool contain = false) const {
     for (int x = 0; x < width; x++) {
-      if (isCollidingWith({x, row})) {
+      if ((!contain ? isCollidingWith({x, row}) : contains({x, row}))) {
         out << "*";
       } else {
         out << " ";

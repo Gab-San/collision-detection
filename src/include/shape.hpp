@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <vector>
 
-// FIXME: Position isn't relative to parent RigidBody as of now.
+// FIXME: Position isn't relative to parent RigidBody
 
 template <unsigned int dim, class DerivedShape> class Shape {
 public:
@@ -110,7 +110,6 @@ private:
   }
 };
 
-// TODO: implement Circle-Point collision
 template <unsigned int dim> class Circle : public Shape<dim, Circle<dim>> {
   const Point<dim> center;
   const unsigned int radius;
@@ -127,23 +126,63 @@ public:
       return checkCollisionWith(point);
     }
   }
+
   bool contains(const Point<dim> &point) const {
-    return isCollidingWith(point);
+    const int center_point_dist_x = center.x - point.x;
+    const unsigned int dist_x = center_point_dist_x * center_point_dist_x;
+    const int center_point_dist_y = center.y - point.y;
+    const unsigned int dist_y = center_point_dist_y * center_point_dist_y;
+
+    return dist_x + dist_y <= radius * radius;
   }
 
   std::vector<Point<dim>> &getPerimeter() const {
     if (!cached_perimeter.empty()) {
       return cached_perimeter;
     }
+
     cached_perimeter.clear();
+
+    int x = -radius;
+    int y = 0;
+    cached_perimeter.push_back(center + Point<dim>(x, y));
+    cached_perimeter.push_back(center + Point<dim>(-x, y));
+
+    cached_perimeter.push_back(center + Point<dim>(0, radius));
+    cached_perimeter.push_back(center + Point<dim>(0, -radius));
+
+    while (x < static_cast<int>(radius)) {
+      if (x < 0) {
+        if (x * x + (y + 1) * (y + 1) > radius * radius) {
+          x++;
+        } else {
+          y++;
+        }
+      } else {
+        if ((x + 1) * (x + 1) + y * y > radius * radius) {
+          y--;
+        } else {
+          x++;
+        }
+      }
+
+      cached_perimeter.push_back(center + Point<dim>(x, y));
+      cached_perimeter.push_back(center + Point<dim>(x, -y));
+    }
+
     return cached_perimeter;
   }
 
 private:
   bool checkCollisionWith(const Point<2> &point) const {
-    throw std::runtime_error("Circle::checkCollisionWith(Point<2>&) : "
-                             "Collision Detection in 2D not yet implemented!");
+    const int center_point_dist_x = center.x - point.x;
+    const unsigned int dist_x = center_point_dist_x * center_point_dist_x;
+    const int center_point_dist_y = center.y - point.y;
+    const unsigned int dist_y = center_point_dist_y * center_point_dist_y;
+
+    return dist_x + dist_y == radius * radius;
   }
+
   bool checkCollisionWith(const Point<3> &point) const {
     throw std::runtime_error("Circle::checkCollisionWith(Point<3>&) : "
                              "Collision Detection in 3D not yet implemented!");
