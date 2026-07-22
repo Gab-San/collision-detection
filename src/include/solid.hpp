@@ -3,14 +3,13 @@
 
 #include "shape.hpp"
 
-#include <iostream>
 #include <utility>
 #include <variant>
 #include <vector>
 
 template <int dim>
 using CollisionShapesT =
-    std::variant<Segment<dim>, Circle<dim>, Rectangle<dim>>;
+    std::variant<Segment<dim>, Circle<dim>, Parallelogram<dim>>;
 
 template <unsigned int dim> class RigidBody {
 

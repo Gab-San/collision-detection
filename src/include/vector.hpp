@@ -3,25 +3,43 @@
 
 #include "point.hpp"
 
-#include <stdexcept>
+template <int dim> struct Vector;
 
-template <int dim> struct Vector {
-  const Point<dim> A, B;
+template <> struct Vector<2> {
+  const int dx, dy;
 
-  Vector(const Point<dim> &A_, const Point<dim> &B_) : A(A_), B(B_) {}
+  Vector(const int &x, const int &y) : dx(x), dy(y) {}
+  Vector(const Point<2> &A_, const Point<2> &B_)
+      : Vector(B_.x - A_.x, B_.y - A_.y) {}
 
-  const int dot(const Vector<dim> &other) const {
-    if constexpr (dim == 2) {
-      return (B - A).x * (other.B - other.A).x +
-             (B - A).y * (other.B - other.A).y;
-    } else {
-      std::runtime_error("Vector<3>::dot() : dim == 3 not implemented");
-    }
+  // ---- OPERATOR OVERLOADING ----
+
+  inline friend Vector<2> operator-(const Vector<2> &lhs,
+                                    const Vector<2> &rhs) {
+    return Vector(lhs.dx - rhs.dx, lhs.dy - rhs.dy);
   }
 };
 
 // template <> struct Vector<2> {
 //   const Point<2>
 // };
+
+template <int dim>
+const int dot(const Vector<dim> &lhs, const Vector<dim> &rhs) {
+  if constexpr (dim == 2) {
+    return lhs.dx * rhs.dx + lhs.dy * rhs.dy;
+  } else {
+    static_assert(false, "dot() : operator not yet implemented for 3D");
+  }
+}
+
+template <int dim>
+const int cross(const Vector<dim> &lhs, const Vector<dim> &rhs) {
+  if constexpr (dim == 2) {
+    return lhs.dx * rhs.dy - lhs.dy * rhs.dx;
+  } else {
+    static_assert(false, "cross() : operator not yet implemented for 3D");
+  }
+}
 
 #endif // _VECTOR_HPP

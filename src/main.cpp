@@ -13,23 +13,22 @@ std::ostream &operator<<(std::ostream &out,
 int main(int argc, char *argv[]) {
   std::vector<CollisionShapesT<2>> shapes;
 
-  RigidBody<2> solid(Point<2>(-10, -10),
-                     {
-                         Circle<2>(Point<2>(10, 10), 5),
-                         Segment<2>(Point<2>(10, 15), Point<2>(15, 15)),
-                         Segment<2>(Point<2>(15, 10), Point<2>(15, 15)),
-                         Rectangle<2>(Point<2>(30, 30), Point<2>(35, 35)),
+  RigidBody<2> solid(
+      Point<2>(-5, -5),
+      {
+          Circle<2>(Point<2>(10, 10), 5),
+          // Segment<2>(Point<2>(10, 15), Point<2>(15, 15)),
+          // Segment<2>(Point<2>(15, 10), Point<2>(15, 15)),
+          Parallelogram<2>(Point<2>(15, 10), Point<2>(15, 15), Point<2>(10, 15),
+                           Point<2>(10, 10)),
+          // Parallelogram<2>(Point<2>(30, 30), Point<2>(35, 35)),
 
-                         Rectangle<2>(Point<2>(24, 20), Point<2>(26, 22),
-                                      Point<2>(22, 26), Point<2>(20, 24)),
-                         // Segment<2>(Point<2>(24, 20), Point<2>(26, 22)),
-                         // Segment<2>(Point<2>(26, 22), Point<2>(22, 26)),
-                         // Segment<2>(Point<2>(22, 26), Point<2>(20, 24)),
-                         // Segment<2>(Point<2>(20, 24), Point<2>(24, 20)),
-                         // Segment<2>(Point<2>(0, 0), Point<2>(0, 129)),
-                         // Segment<2>(Point<2>(0, 129), Point<2>(129, 129)),
-                         // Segment<2>(Point<2>(129, 129), Point<2>(129, 0))
-                     });
+          Parallelogram<2>(Point<2>(24, 20), Point<2>(26, 22), Point<2>(22, 26),
+                           Point<2>(20, 24)),
+          // Segment<2>(Point<2>(0, 0), Point<2>(0, 129)),
+          // Segment<2>(Point<2>(0, 129), Point<2>(129, 129)),
+          // Segment<2>(Point<2>(129, 129), Point<2>(129, 0))
+      });
   bool hard_contain = false;
   if (argc > 1) {
     hard_contain = *argv[1] == '1';

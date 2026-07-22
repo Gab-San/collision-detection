@@ -12,24 +12,26 @@ template <> struct Point<2> {
   Point(const int x_, const int y_) : x(x_), y(y_) {}
   ~Point() = default;
 
+  inline const unsigned int distsqr(const Point<2> &B) const {
+    return (x - B.x) * (x - B.x) + (y - B.y) * (y - B.y);
+  }
+
+  // ---- OPERATOR OVERLOADING ----
+
   inline friend bool operator==(const Point<2> &lhs, const Point<2> &rhs) {
     return lhs.x == rhs.x && lhs.y == rhs.y;
   }
 
   inline friend Point<2> operator+(const Point<2> &lhs, const Point<2> &rhs) {
-    return Point<2>(lhs.x + rhs.x, lhs.y + rhs.y);
+    return Point(lhs.x + rhs.x, lhs.y + rhs.y);
   }
 
   inline friend Point<2> operator-(const Point<2> &lhs, const Point<2> &rhs) {
-    return Point<2>(lhs.x - rhs.x, lhs.y - rhs.y);
+    return Point(lhs.x - rhs.x, lhs.y - rhs.y);
   }
 
   inline friend std::ostream &operator<<(std::ostream &out, const Point<2> &p) {
     return out << "(" << p.x << "," << p.y << ")";
-  }
-
-  inline const unsigned int distsqr(const Point<2> &B) const {
-    return (x - B.x) * (x - B.x) + (y - B.y) * (y - B.y);
   }
 };
 
@@ -45,7 +47,11 @@ template <> struct Point<3> {
   }
 
   inline friend Point<3> operator+(const Point<3> &lhs, const Point<3> &rhs) {
-    return Point<3>(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
+    return Point(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
+  }
+
+  inline friend Point<3> operator-(const Point<3> &lhs, const Point<3> &rhs) {
+    return Point(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
   }
 
   inline friend std::ostream &operator<<(std::ostream &out, const Point<3> &p) {

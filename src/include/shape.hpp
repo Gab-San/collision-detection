@@ -8,7 +8,6 @@
 #include <stdexcept>
 #include <vector>
 
-// FIXME: Position isn't relative to parent RigidBody
 // FIXME: Should be extendible to 3D
 
 template <unsigned int dim, class DerivedShape> class Shape {
@@ -43,11 +42,11 @@ public:
   ~Segment() = default;
 
   bool isCollidingWith(const Point<dim> &point) const {
-    if constexpr (dim == 2) {
-      return checkCollisionWith(point);
-    } else {
-      return checkCollisionWith(point);
-    }
+    const Vector<dim> AP(A, point);
+    const int dotAP_AB = dot(AP, AB);
+    const int dotAB_AB = dot(AB, AB);
+
+    return cross(AP, AB) == 0 && dotAP_AB >= 0 && dotAP_AB <= dotAB_AB;
   }
 
   bool contains(const Point<dim> &point) const {
@@ -106,35 +105,6 @@ public:
       }
     }
     return cached_perimeter;
-  }
-
-private:
-  bool checkCollisionWith(const Point<2> &point) const {
-    if (B.x - A.x == 0) {
-      const int max_y = B.y > A.y ? B.y : A.y;
-      const int min_y = B.y > A.y ? A.y : B.y;
-      // If vertical line check that Ymin <= Yp <= Ymax and Xp == Xseg
-      return point.x == B.x && point.y <= max_y && point.y >= min_y;
-    }
-
-    if (B.y - A.y == 0) {
-      const int max_x = B.x > A.x ? B.x : A.x;
-      const int min_x = B.x > A.x ? A.x : B.x;
-      // If horizontal line check that Xmin <= Xp <= Xman & Yp == Yseg
-      return point.y == B.y && point.x <= max_x && point.x >= min_x;
-    }
-
-    // Check that slope on both X and Y is the same and it is
-    // between 0 and 1
-
-    const double k_x = (point.x - A.x) / dist_x;
-    const double k_y = (point.y - A.y) / dist_y;
-    return k_x == k_y && k_x >= 0 && k_x <= 1;
-  }
-
-  bool checkCollisionWith(const Point<3> &point) const {
-    throw std::runtime_error("Segment::checkCollisionWith : Collision "
-                             "Detection in 3D not yet implemented");
   }
 };
 
@@ -216,26 +186,27 @@ private:
   }
 
   bool checkCollisionWith(const Point<3> &point) const {
-    throw std::runtime_error("Circle::checkCollisionWith(Point<3>&) : "
-                             "Collision Detection in 3D not yet implemented!");
+
+    static_assert(false, "Circle::checkCollisionWith(Point<3>&) : "
+                         "Collision Detection in 3D not yet implemented!");
   }
 };
 
-#include <iostream>
-
-// TODO: implement Rectangle-Point collision
 template <unsigned int dim>
-class Rectangle : public Shape<dim, Rectangle<dim>> {
+class Parallelogram : public Shape<dim, Parallelogram<dim>> {
   const Point<dim> A, B, C, D;
   mutable std::vector<Point<dim>> cached_perimeter;
 
 public:
-  Rectangle(const Point<dim> A_, const Point<dim> C_)
-      : Rectangle(A_, Point<dim>(A_.x, C_.y), C_, Point<dim>(C_.x, A_.y)) {}
-
-  Rectangle(const Point<dim> A_, const Point<dim> B_, const Point<dim> C_,
-            const Point<dim> D_)
-      : A(A_), B(B_), C(C_), D(D_) {}
+  Parallelogram(const Point<dim> A_, const Point<dim> B_, const Point<dim> C_,
+                const Point<dim> D_)
+      : A(A_), B(B_), C(C_), D(D_) {
+    Vector<dim> AB(A_, B_), BC(B_, C_), CD(C_, D_), DA(D_, A_);
+    if (dot(AB, CD) != 1 || dot(BC, DA) != 1) {
+      throw std::invalid_argument(
+          "Parallelogram : opposite sides not parallel");
+    }
+  }
 
   bool isCollidingWith(const Point<dim> &point) const {
     Segment<dim> sideAB(A, B);
@@ -252,10 +223,10 @@ public:
   bool contains(const Point<dim> &point) const {
     const Vector<dim> AB(A, B), AD(A, D), AP(A, point);
 
-    const int dotAB_AB = AB.dot(AB);
-    const int dotAP_AB = AP.dot(AB);
-    const int dotAD_AD = AD.dot(AD);
-    const int dotAP_AD = AP.dot(AD);
+    const int dotAB_AB = dot(AB, AB);
+    const int dotAP_AB = dot(AP, AB);
+    const int dotAD_AD = dot(AD, AD);
+    const int dotAP_AD = dot(AP, AD);
 
     // The dot product can be considered the module of the projection
     // of vector AP onto the target vector (AB, AD).
