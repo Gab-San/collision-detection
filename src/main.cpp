@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <vector>
 
 template <unsigned int dim> void draw(RigidBody<dim> &, bool hard_contain);
 template <unsigned int dim>
@@ -10,14 +11,25 @@ std::ostream &operator<<(std::ostream &out,
                          const std::vector<Point<dim>> &perimeter);
 
 int main(int argc, char *argv[]) {
-  std::vector<CollisionShapesT<2>> shapes{
-      Circle<2>(Point<2>(10, 10), 5),
-      // Segment<2>(Point<2>(0, 0), Point<2>(0, 129)),
-      // Segment<2>(Point<2>(0, 129), Point<2>(129, 129)),
-      // Segment<2>(Point<2>(129, 129), Point<2>(129, 0))
-  };
+  std::vector<CollisionShapesT<2>> shapes;
 
-  RigidBody<2> solid(Point<2>(0, 0), std::move(shapes));
+  RigidBody<2> solid(Point<2>(0, 0),
+                     {
+                         Circle<2>(Point<2>(10, 10), 5),
+                         Segment<2>(Point<2>(10, 15), Point<2>(15, 15)),
+                         Segment<2>(Point<2>(15, 10), Point<2>(15, 15)),
+                         // Rectangle<2>(Point<2>(20, 20), Point<2>(25, 25)),
+
+                         Rectangle<2>(Point<2>(24, 20), Point<2>(26, 22),
+                                      Point<2>(22, 26), Point<2>(20, 24)),
+                         // Segment<2>(Point<2>(24, 20), Point<2>(26, 22)),
+                         // Segment<2>(Point<2>(26, 22), Point<2>(22, 26)),
+                         // Segment<2>(Point<2>(22, 26), Point<2>(20, 24)),
+                         // Segment<2>(Point<2>(20, 24), Point<2>(24, 20)),
+                         // Segment<2>(Point<2>(0, 0), Point<2>(0, 129)),
+                         // Segment<2>(Point<2>(0, 129), Point<2>(129, 129)),
+                         // Segment<2>(Point<2>(129, 129), Point<2>(129, 0))
+                     });
   bool hard_contain = false;
   if (argc > 1) {
     hard_contain = *argv[1] == '1';
@@ -31,8 +43,8 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-#define VIEWPORT_WIDTH 20
-#define VIEWPORT_HEIGHT 16
+#define VIEWPORT_WIDTH 50
+#define VIEWPORT_HEIGHT 50
 
 template <unsigned int dim>
 void draw(RigidBody<dim> &solid, bool hard_contain) {

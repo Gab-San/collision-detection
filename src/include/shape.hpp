@@ -8,6 +8,7 @@
 #include <vector>
 
 // FIXME: Position isn't relative to parent RigidBody
+// FIXME: Should be extendible to 3D
 
 template <unsigned int dim, class DerivedShape> class Shape {
 public:
@@ -19,7 +20,7 @@ public:
     return static_cast<DerivedShape *>(this)->contains(point);
   };
 
-  std::vector<Point<dim>> &getPerimeter() {
+  std::vector<Point<dim>> &getPerimeter() const {
     return static_cast<DerivedShape *>(this)->getPerimeter();
   };
 
@@ -58,12 +59,37 @@ public:
 
     cached_perimeter.clear();
 
+    if (B.x - A.x == 0) {
+      const bool isneg = (B.y - A.y) < 0;
+      const int end = isneg ? A.y - (B.y - A.y) : B.y;
+
+      for (int y = A.y; y <= end; y++) {
+        const int dist = isneg ? 2 * (y - A.y) : 0;
+        cached_perimeter.push_back(Point<dim>(A.x, y - dist));
+      }
+
+      return cached_perimeter;
+    }
+
+    if (B.y - A.y == 0) {
+      const bool isneg = (B.x - A.x) < 0;
+      const int end = isneg ? A.x - (B.x - A.x) : B.x;
+
+      for (int x = A.x; x <= end; x++) {
+        const int dist = isneg ? 2 * (x - A.x) : 0;
+        cached_perimeter.push_back(Point<dim>(x - dist, A.y));
+      }
+
+      return cached_perimeter;
+    }
+
+    // FIXME: This does not match the expected results
     if constexpr (std::abs(B.x - A.x) < std::abs(B.y - A.y)) {
       const int max_x = B.x > A.x ? B.x : A.x;
       const int min_x = B.x > A.x ? A.x : B.x;
 
       for (int x = min_x; x <= max_x; x++) {
-        const double k_y = x - A.x / dist_x;
+        const double k_y = (x - A.x) / dist_x;
         const int y = A.y + k_y * (B.y - A.y);
         cached_perimeter.push_back(Point<dim>(x, y));
       }
@@ -72,7 +98,7 @@ public:
       const int min_y = B.y > A.y ? A.y : B.y;
 
       for (int y = min_y; y <= max_y; y++) {
-        const double k_x = y - A.y / dist_y;
+        const double k_x = (y - A.y) / dist_y;
         const int x = A.x + k_x * (B.x - A.x);
         cached_perimeter.push_back(Point<dim>(x, y));
       }
@@ -99,8 +125,8 @@ private:
     // Check that slope on both X and Y is the same and it is
     // between 0 and 1
 
-    const double k_x = point.x - A.x / dist_x;
-    const double k_y = point.y - A.y / dist_y;
+    const double k_x = (point.x - A.x) / dist_x;
+    const double k_y = (point.y - A.y) / dist_y;
     return k_x == k_y && k_x >= 0 && k_x <= 1;
   }
 
@@ -166,6 +192,10 @@ public:
         }
       }
 
+      if (y == -y) {
+        continue;
+      }
+
       cached_perimeter.push_back(center + Point<dim>(x, y));
       cached_perimeter.push_back(center + Point<dim>(x, -y));
     }
@@ -189,6 +219,8 @@ private:
   }
 };
 
+#include <iostream>
+
 // TODO: implement Rectangle-Point collision
 template <unsigned int dim>
 class Rectangle : public Shape<dim, Rectangle<dim>> {
@@ -204,15 +236,27 @@ public:
       : A(A_), B(B_), C(C_), D(D_) {}
 
   bool isCollidingWith(const Point<dim> &point) const {
-    if constexpr (dim == 2) {
-      return checkCollisionWith(point);
-    } else {
-      return checkCollisionWith(point);
-    }
+    Segment<dim> sideAB(A, B);
+    Segment<dim> sideBC(B, C);
+    Segment<dim> sideCD(C, D);
+    Segment<dim> sideDA(D, A);
+
+    bool hit = sideAB.isCollidingWith(point) || sideBC.isCollidingWith(point) ||
+               sideCD.isCollidingWith(point) || sideDA.isCollidingWith(point);
+
+    return hit;
   }
 
+  // FIXME: This does not take into account inner points
   bool contains(const Point<dim> &point) const {
-    return isCollidingWith(point);
+    const int max_x = A.x > D.x ? A.x : D.x;
+    const int min_x = max_x == A.x ? D.x : A.x;
+
+    const int max_y = A.y > B.y ? A.y : B.y;
+    const int min_y = max_y == A.y ? B.y : A.y;
+
+    return point.x >= min_x && point.x <= max_x && point.y >= min_y &&
+           point.y <= max_y;
   }
 
   std::vector<Point<dim>> &getPerimeter() const {
@@ -221,18 +265,25 @@ public:
     }
 
     cached_perimeter.clear();
+    Segment<dim> sideAB(A, B);
+    Segment<dim> sideBC(B, C);
+    Segment<dim> sideCD(C, D);
+    Segment<dim> sideDA(D, A);
+
+    for (const auto &p : sideAB.getPerimeter()) {
+      cached_perimeter.push_back(p);
+    }
+    for (const auto &p : sideBC.getPerimeter()) {
+      cached_perimeter.push_back(p);
+    }
+    for (const auto &p : sideCD.getPerimeter()) {
+      cached_perimeter.push_back(p);
+    }
+    for (const auto &p : sideDA.getPerimeter()) {
+      cached_perimeter.push_back(p);
+    }
+
     return cached_perimeter;
-  }
-
-private:
-  bool checkCollisionWith(const Point<2> &point) const {
-    throw std::runtime_error("Rectangle::checkCollisionWith(Point<2>&) : "
-                             "Collision Detection in 2D not yet implemented!");
-  }
-
-  bool checkCollisionWith(const Point<3> &point) const {
-    throw std::runtime_error("Rectangle::checkCollisionWith(Point<3>&) : "
-                             "Collision Detection in 3D not yet implemented!");
   }
 };
 
