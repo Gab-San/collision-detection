@@ -3,7 +3,6 @@
 
 #include "shape.hpp"
 
-#include <functional>
 #include <iostream>
 #include <utility>
 #include <variant>
@@ -30,7 +29,10 @@ public:
   bool isCollidingWith(const Point<dim> &point) const {
     for (const auto &sh : collision_shapes) {
       bool hit = std::visit(
-          [&](const auto &shape) { return shape.isCollidingWith(point); }, sh);
+          [&](const auto &shape) {
+            return shape.isCollidingWith(point - position);
+          },
+          sh);
 
       if (hit)
         return true;
@@ -41,25 +43,13 @@ public:
   bool contains(const Point<dim> &point) const {
     for (const auto &sh : collision_shapes) {
       bool hit = std::visit(
-          [&](const auto &shape) { return shape.contains(point); }, sh);
+          [&](const auto &shape) { return shape.contains(point - position); },
+          sh);
 
       if (hit)
         return true;
     }
     return false;
-  }
-
-  std::ostream &draw(std::ostream &out, const int row, const int width,
-                     const bool contain = false) const {
-    for (int x = 0; x < width; x++) {
-      if ((!contain ? isCollidingWith({x, row}) : contains({x, row}))) {
-        out << "*";
-      } else {
-        out << " ";
-      }
-    }
-
-    return out;
   }
 
   const std::vector<Point<dim>> &getPerimeter(bool force = false) const {
@@ -72,7 +62,7 @@ public:
           [&](const auto &shape) {
             const auto &shape_perimeter = shape.getPerimeter();
             for (const auto &p : shape_perimeter) {
-              cached_perimeter.emplace_back(p);
+              cached_perimeter.emplace_back(position + p);
             }
           },
           sh);

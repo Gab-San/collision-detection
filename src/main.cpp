@@ -13,12 +13,12 @@ std::ostream &operator<<(std::ostream &out,
 int main(int argc, char *argv[]) {
   std::vector<CollisionShapesT<2>> shapes;
 
-  RigidBody<2> solid(Point<2>(0, 0),
+  RigidBody<2> solid(Point<2>(-10, -10),
                      {
                          Circle<2>(Point<2>(10, 10), 5),
                          Segment<2>(Point<2>(10, 15), Point<2>(15, 15)),
                          Segment<2>(Point<2>(15, 10), Point<2>(15, 15)),
-                         // Rectangle<2>(Point<2>(20, 20), Point<2>(25, 25)),
+                         Rectangle<2>(Point<2>(30, 30), Point<2>(35, 35)),
 
                          Rectangle<2>(Point<2>(24, 20), Point<2>(26, 22),
                                       Point<2>(22, 26), Point<2>(20, 24)),
@@ -65,12 +65,21 @@ void draw(RigidBody<dim> &solid, bool hard_contain) {
   for (int y = 0; y < VIEWPORT_HEIGHT; y++) {
     std::cout.width(digits);
     std::cout << y << "|";
-    solid.draw(std::cout, y, VIEWPORT_WIDTH, hard_contain) << std::endl;
+    for (int x = 0; x < VIEWPORT_WIDTH; x++) {
+      if ((!hard_contain ? solid.isCollidingWith(Point<dim>(x, y))
+                         : solid.contains(Point<dim>(x, y)))) {
+        std::cout << "*";
+      } else {
+        std::cout << " ";
+      }
+    }
+    std::cout << std::endl;
   }
 
   for (int i = 0; i < digits; i++) {
     std::cout << " ";
   }
+
   std::cout << "" << std::endl;
   std::cout.width(digits + 1);
   std::cout << "y" << std::endl;

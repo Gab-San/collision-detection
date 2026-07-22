@@ -2,6 +2,7 @@
 #define _SHAPE_HPP
 
 #include "point.hpp"
+#include "vector.hpp"
 
 #include <cmath>
 #include <stdexcept>
@@ -29,13 +30,14 @@ protected:
 };
 
 template <unsigned int dim> class Segment : public Shape<dim, Segment<dim>> {
+  const Vector<dim> AB;
   const Point<dim> A, B;
   mutable std::vector<Point<dim>> cached_perimeter;
   const double dist_x, dist_y;
 
 public:
   Segment(const Point<dim> A_, const Point<dim> B_)
-      : A(A_), B(B_), dist_x(static_cast<double>(B.x - A.x)),
+      : AB(A_, B_), A(A_), B(B_), dist_x(static_cast<double>(B.x - A.x)),
         dist_y(static_cast<double>(B.y - A.y)) {}
 
   ~Segment() = default;
@@ -247,16 +249,25 @@ public:
     return hit;
   }
 
-  // FIXME: This does not take into account inner points
   bool contains(const Point<dim> &point) const {
-    const int max_x = A.x > D.x ? A.x : D.x;
-    const int min_x = max_x == A.x ? D.x : A.x;
+    const Vector<dim> AB(A, B), AD(A, D), AP(A, point);
 
-    const int max_y = A.y > B.y ? A.y : B.y;
-    const int min_y = max_y == A.y ? B.y : A.y;
+    const int dotAB_AB = AB.dot(AB);
+    const int dotAP_AB = AP.dot(AB);
+    const int dotAD_AD = AD.dot(AD);
+    const int dotAP_AD = AP.dot(AD);
 
-    return point.x >= min_x && point.x <= max_x && point.y >= min_y &&
-           point.y <= max_y;
+    // The dot product can be considered the module of the projection
+    // of vector AP onto the target vector (AB, AD).
+    // The projection of a vector onto itself (if normalized) is equal to 1.
+    // The projection of any other vector will be between [-1, 1).
+    //
+    // In this case we check that the projection of the vector is positive and
+    // it is less then the projection of the target vector onto itself (if
+    // normalized this would correspond to checking that the projection lies in
+    // [0,1]).
+    return dotAP_AB >= 0 && dotAP_AB <= dotAB_AB && dotAP_AD >= 0 &&
+           dotAP_AD <= dotAD_AD;
   }
 
   std::vector<Point<dim>> &getPerimeter() const {

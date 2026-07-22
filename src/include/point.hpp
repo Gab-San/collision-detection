@@ -20,6 +20,10 @@ template <> struct Point<2> {
     return Point<2>(lhs.x + rhs.x, lhs.y + rhs.y);
   }
 
+  inline friend Point<2> operator-(const Point<2> &lhs, const Point<2> &rhs) {
+    return Point<2>(lhs.x - rhs.x, lhs.y - rhs.y);
+  }
+
   inline friend std::ostream &operator<<(std::ostream &out, const Point<2> &p) {
     return out << "(" << p.x << "," << p.y << ")";
   }
