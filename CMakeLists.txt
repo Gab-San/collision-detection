@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 4.3)
 
-project(RigidBody)
+project(lbm-collision-detection)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -8,15 +8,16 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
 file(
   GLOB_RECURSE
-  PROJ_SRCS
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
+  COLLISION_DETECTION_CORE_HEADERS
+  "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp"
 )
 
-add_executable(${PROJECT_NAME} ${PROJ_SRCS})
+add_library(${PROJECT_NAME} INTERFACE ${COLLISION_DETECTION_CORE_HEADERS})
 target_include_directories(
   ${PROJECT_NAME}
-  PRIVATE
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/include"
+  INTERFACE
+  "${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
-target_compile_options(${PROJECT_NAME} PRIVATE "-g")
+
+add_subdirectory(test)
+

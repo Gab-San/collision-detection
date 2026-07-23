@@ -1,7 +1,14 @@
 #ifndef _VECTOR_HPP
 #define _VECTOR_HPP
 
-#include "point.hpp"
+// COLLISION DETECTION LIB
+#include "core/point.hpp"
+
+// C++ STANDARD LIB
+#include <iostream>
+
+namespace lbm {
+namespace utils {
 
 template <int dim> struct Vector;
 
@@ -17,6 +24,11 @@ template <> struct Vector<2> {
   inline friend Vector<2> operator-(const Vector<2> &lhs,
                                     const Vector<2> &rhs) {
     return Vector(lhs.dx - rhs.dx, lhs.dy - rhs.dy);
+  }
+
+  inline friend std::ostream &operator<<(std::ostream &out,
+                                         const Vector<2> &v) {
+    return out << "Vector(" << v.dx << "," << v.dy << ")";
   }
 };
 
@@ -41,5 +53,8 @@ const int cross(const Vector<dim> &lhs, const Vector<dim> &rhs) {
     static_assert(false, "cross() : operator not yet implemented for 3D");
   }
 }
+
+} // namespace utils
+} // namespace lbm
 
 #endif // _VECTOR_HPP

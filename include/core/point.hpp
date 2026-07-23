@@ -1,7 +1,11 @@
 #ifndef _POINT_HPP
 #define _POINT_HPP
 
+// C++ STANDARD LIB
 #include <iostream>
+
+namespace lbm {
+namespace utils {
 
 template <unsigned int dim> struct Point;
 
@@ -31,7 +35,7 @@ template <> struct Point<2> {
   }
 
   inline friend std::ostream &operator<<(std::ostream &out, const Point<2> &p) {
-    return out << "(" << p.x << "," << p.y << ")";
+    return out << "Point(" << p.x << "," << p.y << ")";
   }
 };
 
@@ -63,5 +67,8 @@ template <> struct Point<3> {
            (z - B.z) * (z - B.z);
   }
 };
+
+} // namespace utils
+} // namespace lbm
 
 #endif // _POINT_HPP

@@ -1,30 +1,37 @@
-#include "point.hpp"
-#include "solid.hpp"
+#include "collision-detection/collision_area.hpp"
 
 #include <algorithm>
 #include <iostream>
 #include <vector>
 
-template <unsigned int dim> void draw(RigidBody<dim> &, bool hard_contain);
+using namespace lbm;
+using namespace lbm::CollisionDetection;
+using namespace lbm::utils;
+
+template <unsigned int dim> void draw(CollisionArea<dim> &, bool hard_contain);
 template <unsigned int dim>
 std::ostream &operator<<(std::ostream &out,
                          const std::vector<Point<dim>> &perimeter);
 
 int main(int argc, char *argv[]) {
+
   std::vector<CollisionShapesT<2>> shapes;
 
-  RigidBody<2> solid(
+  CollisionArea<2> solid(
       Point<2>(-5, -5),
       {
           Circle<2>(Point<2>(10, 10), 5),
+          Segment<2>(Point<2>(20, 20), Point<2>(25, 23)),
           // Segment<2>(Point<2>(10, 15), Point<2>(15, 15)),
           // Segment<2>(Point<2>(15, 10), Point<2>(15, 15)),
-          Parallelogram<2>(Point<2>(15, 10), Point<2>(15, 15), Point<2>(10, 15),
-                           Point<2>(10, 10)),
+          // Parallelogram<2>(Point<2>(15, 10), Point<2>(15, 15), Point<2>(10,
+          // 15),
+          //                  Point<2>(10, 10)),
           // Parallelogram<2>(Point<2>(30, 30), Point<2>(35, 35)),
 
-          Parallelogram<2>(Point<2>(24, 20), Point<2>(26, 22), Point<2>(22, 26),
-                           Point<2>(20, 24)),
+          // Parallelogram<2>(Point<2>(24, 20), Point<2>(26, 22), Point<2>(22,
+          // 26),
+          //                  Point<2>(20, 24)),
           // Segment<2>(Point<2>(0, 0), Point<2>(0, 129)),
           // Segment<2>(Point<2>(0, 129), Point<2>(129, 129)),
           // Segment<2>(Point<2>(129, 129), Point<2>(129, 0))
@@ -42,11 +49,11 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-#define VIEWPORT_WIDTH 50
-#define VIEWPORT_HEIGHT 50
+#define VIEWPORT_WIDTH 40
+#define VIEWPORT_HEIGHT 30
 
 template <unsigned int dim>
-void draw(RigidBody<dim> &solid, bool hard_contain) {
+void draw(CollisionArea<dim> &solid, bool hard_contain) {
   int digits = std::log10(VIEWPORT_HEIGHT) + 1;
 
   for (int x = 0; x < VIEWPORT_WIDTH; x++) {
