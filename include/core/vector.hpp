@@ -20,7 +20,6 @@ template <> struct Vector<2> {
       : Vector(B_.x - A_.x, B_.y - A_.y) {}
 
   // ---- OPERATOR OVERLOADING ----
-
   inline friend Vector<2> operator-(const Vector<2> &lhs,
                                     const Vector<2> &rhs) {
     return Vector(lhs.dx - rhs.dx, lhs.dy - rhs.dy);

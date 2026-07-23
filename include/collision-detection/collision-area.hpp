@@ -18,10 +18,9 @@ using CollisionShapesT =
 
 template <unsigned int dim> class CollisionArea {
 
-  const utils::Point<dim> position;
+  utils::Point<dim> position;
   const std::vector<CollisionShapesT<dim>> collision_shapes;
   mutable std::vector<utils::Point<dim>> cached_perimeter;
-  const bool fixed = true;
 
 public:
   CollisionArea(const utils::Point<dim> position_,

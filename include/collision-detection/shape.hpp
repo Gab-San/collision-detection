@@ -5,8 +5,10 @@
 #include "core/point.hpp"
 #include "core/vector.hpp"
 
+#include "collision-detection/algorithms/rasterization.hpp"
+
 // C++ STANDARD LIB
-#include <cmath>
+#include <algorithm>
 #include <stdexcept>
 #include <vector>
 
@@ -46,13 +48,10 @@ public:
 
   ~Segment() = default;
 
-  // FIXME: replace after rasterization
   bool isCollidingWith(const utils::Point<dim> &point) const {
-    const utils::Vector<dim> AP(A, point);
-    const int dotAP_AB = dot(AP, AB);
-    const int dotAB_AB = dot(AB, AB);
-
-    return cross(AP, AB) == 0 && dotAP_AB >= 0 && dotAP_AB <= dotAB_AB;
+    const auto &perimeter = getPerimeter();
+    return std::find(perimeter.begin(), perimeter.end(), point) !=
+           perimeter.end();
   }
 
   bool contains(const utils::Point<dim> &point) const {
@@ -64,52 +63,15 @@ public:
       return cached_perimeter;
     }
 
-    cached_perimeter.clear();
+    const utils::Vector<dim> AB(A, B);
 
-    if (B.x - A.x == 0) {
-      const bool isneg = (B.y - A.y) < 0;
-      const int end = isneg ? A.y - (B.y - A.y) : B.y;
-
-      for (int y = A.y; y <= end; y++) {
-        const int dist = isneg ? 2 * (y - A.y) : 0;
-        cached_perimeter.push_back(utils::Point<dim>(A.x, y - dist));
-      }
-
-      return cached_perimeter;
-    }
-
-    if (B.y - A.y == 0) {
-      const bool isneg = (B.x - A.x) < 0;
-      const int end = isneg ? A.x - (B.x - A.x) : B.x;
-
-      for (int x = A.x; x <= end; x++) {
-        const int dist = isneg ? 2 * (x - A.x) : 0;
-        cached_perimeter.push_back(utils::Point<dim>(x - dist, A.y));
-      }
-
-      return cached_perimeter;
-    }
-
-    // FIXME: This does not match the expected results
-    if constexpr (std::abs(B.x - A.x) < std::abs(B.y - A.y)) {
-      const int max_x = B.x > A.x ? B.x : A.x;
-      const int min_x = B.x > A.x ? A.x : B.x;
-
-      for (int x = min_x; x <= max_x; x++) {
-        const double k_y = (x - A.x) / dist_x;
-        const int y = A.y + k_y * (B.y - A.y);
-        cached_perimeter.push_back(utils::Point<dim>(x, y));
-      }
+    // FIXME: This needs to be extended to 3D case
+    if (AB.dx < 0) {
+      cached_perimeter = algorithms::brasenham_rasterisation<2>(B, A);
     } else {
-      const int max_y = B.y > A.y ? B.y : A.y;
-      const int min_y = B.y > A.y ? A.y : B.y;
-
-      for (int y = min_y; y <= max_y; y++) {
-        const double k_x = (y - A.y) / dist_y;
-        const int x = A.x + k_x * (B.x - A.x);
-        cached_perimeter.push_back(utils::Point<dim>(x, y));
-      }
+      cached_perimeter = algorithms::brasenham_rasterisation<2>(A, B);
     }
+
     return cached_perimeter;
   }
 };
@@ -207,7 +169,7 @@ public:
                 const utils::Point<dim> C_, const utils::Point<dim> D_)
       : A(A_), B(B_), C(C_), D(D_) {
     utils::Vector<dim> AB(A_, B_), BC(B_, C_), CD(C_, D_), DA(D_, A_);
-    if (dot(AB, CD) != 1 || dot(BC, DA) != 1) {
+    if (cross(AB, CD) != 0 || cross(BC, DA) != 0) {
       throw std::invalid_argument(
           "Parallelogram : opposite sides not parallel");
     }
@@ -261,12 +223,18 @@ public:
       cached_perimeter.push_back(p);
     }
     for (const auto &p : sideBC.getPerimeter()) {
+      if (p == B)
+        continue;
       cached_perimeter.push_back(p);
     }
     for (const auto &p : sideCD.getPerimeter()) {
+      if (p == C)
+        continue;
       cached_perimeter.push_back(p);
     }
     for (const auto &p : sideDA.getPerimeter()) {
+      if (p == D || p == A)
+        continue;
       cached_perimeter.push_back(p);
     }
 

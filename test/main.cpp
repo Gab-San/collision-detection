@@ -1,6 +1,7 @@
-#include "collision-detection/collision_area.hpp"
+#include "collision-detection/collision-area.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <vector>
 
@@ -16,26 +17,27 @@ std::ostream &operator<<(std::ostream &out,
 int main(int argc, char *argv[]) {
 
   std::vector<CollisionShapesT<2>> shapes;
-
-  CollisionArea<2> solid(
-      Point<2>(-5, -5),
-      {
-          Circle<2>(Point<2>(10, 10), 5),
-          Segment<2>(Point<2>(20, 20), Point<2>(25, 23)),
-          // Segment<2>(Point<2>(10, 15), Point<2>(15, 15)),
-          // Segment<2>(Point<2>(15, 10), Point<2>(15, 15)),
-          // Parallelogram<2>(Point<2>(15, 10), Point<2>(15, 15), Point<2>(10,
-          // 15),
-          //                  Point<2>(10, 10)),
-          // Parallelogram<2>(Point<2>(30, 30), Point<2>(35, 35)),
-
-          // Parallelogram<2>(Point<2>(24, 20), Point<2>(26, 22), Point<2>(22,
-          // 26),
-          //                  Point<2>(20, 24)),
-          // Segment<2>(Point<2>(0, 0), Point<2>(0, 129)),
-          // Segment<2>(Point<2>(0, 129), Point<2>(129, 129)),
-          // Segment<2>(Point<2>(129, 129), Point<2>(129, 0))
-      });
+  // CollisionArea solid(Point<2>(0, 0),
+  //                     {
+  //                         Segment<2>(Point<2>(20, 20), Point<2>(30, 20)),
+  //                         Segment<2>(Point<2>(20, 20), Point<2>(30, 28)),
+  //                         Segment<2>(Point<2>(20, 20), Point<2>(20, 30)),
+  //                         Segment<2>(Point<2>(20, 20), Point<2>(30, 15)),
+  //                         Segment<2>(Point<2>(20, 20), Point<2>(30, 10)),
+  //                         Segment<2>(Point<2>(20, 20), Point<2>(20, 10)),
+  //                         Segment<2>({20, 20}, {18, 15}),
+  //                         Segment<2>({20, 20}, {10, 10}),
+  //                         Segment<2>({20, 20}, {5, 10}),
+  //                         Segment<2>({20, 20}, {10, 20}),
+  //                         Segment<2>({20, 20}, {12, 23}),
+  //                         Segment<2>({20, 20}, {15, 25}),
+  //                     });
+  // CollisionArea solid(Point<2>(0, 0),
+  //                     {
+  //                         Parallelogram<2>({0, 0}, {4, 0}, {7, 10}, {3, 10}),
+  //                         Parallelogram<2>({4, 0}, {0, 3}, {3, 10}, {7, 7}),
+  //                     });
+  CollisionArea solid(Point<2>(0, 0), {Circle<2>(Point<2>(20, 20), 10)});
   bool hard_contain = false;
   if (argc > 1) {
     hard_contain = *argv[1] == '1';
