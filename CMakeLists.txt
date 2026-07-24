@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.3)
+cmake_minimum_required(VERSION 3.10)
 
 project(lbm-collision-detection)
 
@@ -19,5 +19,7 @@ target_include_directories(
   "${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
 
-add_subdirectory(test)
+if(PROJECT_IS_TOP_LEVEL)
+  add_subdirectory(test)
+endif()
 
