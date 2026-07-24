@@ -1,15 +1,16 @@
-#ifndef _SOLID_HPP
-#define _SOLID_HPP
+#ifndef __COLLISION_AREA_HPP
+#define __COLLISION_AREA_HPP
 
 // COLLISION DETECTION LIB
-#include "collision-detection/shape.hpp"
+#include "shape.hpp"
+
+#include "types/common.hpp"
 
 // C++ STANDARD LIB
 #include <utility>
 #include <variant>
 #include <vector>
 
-namespace lbm {
 namespace CollisionDetection {
 
 template <int dim>
@@ -18,18 +19,18 @@ using CollisionShapesT =
 
 template <unsigned int dim> class CollisionArea {
 
-  utils::Point<dim> position;
+  types::Coordinate<dim> position;
   const std::vector<CollisionShapesT<dim>> collision_shapes;
-  mutable std::vector<utils::Point<dim>> cached_perimeter;
+  mutable std::vector<types::Coordinate<dim>> cached_perimeter;
 
 public:
-  CollisionArea(const utils::Point<dim> position_,
+  CollisionArea(const types::Coordinate<dim> position_,
                 std::vector<CollisionShapesT<dim>> collision_shapes_)
       : position(position_), collision_shapes(std::move(collision_shapes_)) {}
 
   ~CollisionArea() = default;
 
-  bool isCollidingWith(const utils::Point<dim> &point) const {
+  bool isCollidingWith(const types::Coordinate<dim> &point) const {
     for (const auto &sh : collision_shapes) {
       bool hit = std::visit(
           [&](const auto &shape) {
@@ -43,7 +44,7 @@ public:
     return false;
   };
 
-  bool contains(const utils::Point<dim> &point) const {
+  bool contains(const types::Coordinate<dim> &point) const {
     for (const auto &sh : collision_shapes) {
       bool hit = std::visit(
           [&](const auto &shape) { return shape.contains(point - position); },
@@ -55,7 +56,8 @@ public:
     return false;
   }
 
-  const std::vector<utils::Point<dim>> &getPerimeter(bool force = false) const {
+  const std::vector<types::Coordinate<dim>> &
+  getPerimeter(bool force = false) const {
     if (!cached_perimeter.empty() && !force)
       return cached_perimeter;
 
@@ -65,7 +67,10 @@ public:
           [&](const auto &shape) {
             const auto &shape_perimeter = shape.getPerimeter();
             for (const auto &p : shape_perimeter) {
-              cached_perimeter.emplace_back(position + p);
+              if (std::find(cached_perimeter.begin(), cached_perimeter.end(),
+                            p) != cached_perimeter.end()) {
+                cached_perimeter.emplace_back(position + p);
+              }
             }
           },
           sh);
@@ -75,6 +80,5 @@ public:
 };
 
 } // namespace CollisionDetection
-} // namespace lbm
 
 #endif // _SOLID_HPP

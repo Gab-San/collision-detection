@@ -1,25 +1,23 @@
-#ifndef _COLLISION_DETECTION_ALGORITHMS_RASTERIZATION_HPP
-#define _COLLISION_DETECTION_ALGORITHMS_RASTERIZATION_HPP
+#ifndef __ALGORITHMS_RASTERIZATION_HPP
+#define __ALGORITHMS_RASTERIZATION_HPP
 
 // COLLISION DETECTION LIB
-#include "core/point.hpp"
-#include "core/vector.hpp"
+#include "types/common.hpp"
 
 // C++ STANDARD LIB
 #include <vector>
 
-namespace lbm {
+namespace CollisionDetection {
 namespace algorithms {
 
 // FIXME: Extend to 3D
 // FIXME: Extend to all directions
 template <int dim>
-std::vector<utils::Point<2>> brasenham_rasterisation(utils::Point<2> A,
-                                                     utils::Point<2> B) {
-  using namespace utils;
-  std::vector<Point<2>> rasterized_segment;
+std::vector<types::Coordinate<2>>
+brasenham_rasterisation(types::Coordinate<2> A, types::Coordinate<2> B) {
+  std::vector<types::Coordinate<2>> rasterized_segment;
   int error = 0;
-  const Vector<2> AB(A, B);
+  const types::VectorInt<2> AB(A, B);
 
   if (AB.dx >= 0 && AB.dy >= 0) { // FIRST QUADRANT
 
@@ -85,6 +83,6 @@ std::vector<utils::Point<2>> brasenham_rasterisation(utils::Point<2> A,
 }
 
 } // namespace algorithms
-} // namespace lbm
+} // namespace CollisionDetection
 
-#endif
+#endif // __ALGORITHMS_RASTERIZATION_HPP
